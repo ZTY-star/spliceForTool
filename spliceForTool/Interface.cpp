@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "Interface.h"
 
-// DDS½ÓÊÕ·½·¨
+// DDSæŽ¥æ”¶æ–¹æ³•
 class ReadCondHandler {
 public:
 	/**
@@ -31,7 +31,7 @@ private:
 	dds::sub::status::DataState& dataState;
 };
 
-// Ïß³Ì·½·¨
+// çº¿ç¨‹æ–¹æ³•
 bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
 	cout << "[checked] <" << systemId << "> "
 		<< "dds detached thread starts well" << endl;
@@ -86,7 +86,7 @@ bool Interface::start(const char* configName,
 
 		cout << "-----CONGRATULATIONS, ALMOST DONE!-----" << endl;
 
-		// TODO ´¦Àí
+		// TODO å¤„ç†
 		Sleep(1000);
 		return publish(NODE_READY, "me");
 	}
@@ -123,7 +123,7 @@ bool Interface::advance() {
 }
 
 bool Interface::end() {
-	// TODO É¾×ÊÔ´£¬Ä¿Ç°¶¼ÊÇÒýÇæ½áÊøÕâÒ»ÇÐ
+	// TODO åˆ èµ„æºï¼Œç›®å‰éƒ½æ˜¯å¼•æ“Žç»“æŸè¿™ä¸€åˆ‡
 	return true;
 
 }
@@ -191,7 +191,7 @@ bool Interface::process(Msg messageIn) {
 		(*p_setFinish)(currentTime);
 	}
 	else if (tName == SIMULATION_END) {
-		// TODO É¾×ÊÔ´£¬Ä¿Ç°¶¼ÊÇÒýÇæ½áÊøÕâÒ»ÇÐ
+		// TODO åˆ èµ„æºï¼Œç›®å‰éƒ½æ˜¯å¼•æ“Žç»“æŸè¿™ä¸€åˆ‡
 		(*p_endTool)();
 	}
 	else {
@@ -272,7 +272,10 @@ bool Interface::startServerDDS() {
 		<< dds::core::policy::Partition("WaitSet example");
 	dds::sub::Subscriber sub(dp, subQos);
 
-	dds::topic::qos::TopicQos topicQos = dp.default_topic_qos();
+	dds::topic::qos::TopicQos topicQos = dp.default_topic_qos()
+		<< dds::core::policy::Durability::Transient()
+		<< dds::core::policy::Reliability::Reliable()
+		<< dds::core::policy::History::KeepAll();
 
 	for (auto n : pubNames) {
 		dds::topic::Topic<Msg> topic(dp, (const string &)n, topicQos);
@@ -294,7 +297,6 @@ bool Interface::startServerDDS() {
 		dds::sub::status::DataState *newDataState
 			= new dds::sub::status::DataState();
 		(*newDataState) << dds::sub::status::SampleState::not_read()
-			<< dds::sub::status::ViewState::new_view()
 			<< dds::sub::status::InstanceState::any();
 		ReadCondHandler *readCondHandler =
 			new ReadCondHandler(*newDataState);
